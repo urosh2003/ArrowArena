@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,8 +24,8 @@ public class logika : MonoBehaviour
     }
     public void restart()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-
+        SceneManager.LoadScene("SampleScene");
+        gameOverScreen.SetActive(false);
 
     }
 

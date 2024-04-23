@@ -20,31 +20,40 @@ public class Kretanje : MonoBehaviour
     private int dashingDuration;
     public GameObject luk;
     public GameObject strela;
-    private int holdDuration = 0;
+    private float holdDuration = 0;
+    private float holdCooldown = 3;
     private bool holding = false;
+    private bool canceledFire;
     private SpriteResolver spriteResolver;
     bool ziv = true;
     public logika logikaSkripta;
-
+    public GameObject holdingBar;
+    public SpriteRenderer holdingPointer;
+    //+-0.41 +-0.137
     public void Fire(InputAction.CallbackContext context)
     {
         if (ziv)
         {
-            if (context.performed)
+            if (context.performed && !holding)
             {
+                holdingBar.SetActive(true);
+                holdDuration = 0;
                 spriteResolver.SetCategoryAndLabel("Aiming", "Aiming1");
                 holding = true;
-            }
-            if (context.canceled && holdDuration > 50)
-            {
-                spawnArrow();
-                holding = false;
-                holdDuration = 0;
+                canceledFire = false;
             }
             if (context.canceled)
             {
-                holding = false;
-                holdDuration = 0;
+                if(!canceledFire && holdDuration >= 0.5 && holdDuration <= 1) 
+                {
+                    spawnArrow();
+                    holdingBar.SetActive(false);
+                    holding = false;
+                }
+                else
+                {
+                    canceledFire = true;
+                }
                 spriteResolver.SetCategoryAndLabel("Idle", "Idle1");
             }
         }
@@ -105,6 +114,7 @@ public class Kretanje : MonoBehaviour
             else if (lastPointed.x < 0)
             {
                 igrac.transform.eulerAngles = levo;
+                holdingBar.transform.eulerAngles = desno;
             }
             inputVector = lastPointed * brzina;
 
@@ -131,7 +141,16 @@ public class Kretanje : MonoBehaviour
         }
         if (holding)
         {
-            holdDuration++;
+            holdDuration += Time.deltaTime;
+            holdingPointer.transform.localPosition = new Vector3(0.546f * holdDuration -0.4f,0,0);
+            if (holdDuration >= 1.5)
+            {
+                holding = false;
+                holdDuration = 0;
+                spriteResolver.SetCategoryAndLabel("Idle", "Idle1");
+                holdingBar.SetActive(false);
+                holdingPointer.transform.localPosition = new Vector3(-0.4f,0,0);
+            }
         }
     }
 
